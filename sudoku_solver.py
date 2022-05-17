@@ -1,28 +1,34 @@
+"""
+This file is created and designed by Christopher du Toit. The intention of the solver was just for fun and to practice
+a little bit.
+"""
 import numpy as np
 import pygame
-import sys
-import time
 pygame.init()
 
 black = (0, 0, 0)
 white = (255, 255, 255)
 dim = 370
 gap = 40
-win = pygame.display.set_mode((dim,dim))
+win = pygame.display.set_mode((dim, dim))
+clock = pygame.time.Clock()
+fps = 120
 
 
 def start(puzzle):
-    running = True
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                sys.exit()
-        sudoku(puzzle)
-        time.sleep(10)
-        running = False
+    """
+    This method starts the puzzle solver.
+    :param puzzle: Array containing the sudoku puzzle.
+    :type puzzle: nd.array
+    """
+    sudoku(puzzle)
     pygame.quit()
 
+
 def draw_lines():
+    """
+    The method draws the sudoku framework when called.
+    """
     width = 10
     pygame.draw.line(win, black, (0, 0), (0, dim), width)
     pygame.draw.line(win, black, (0, dim), (dim, dim), width)
@@ -37,7 +43,13 @@ def draw_lines():
             pygame.draw.line(win, black, (5+(i*gap), 5), (5+(i*gap), dim-5), width)
             pygame.draw.line(win, black, (5, 5+(i*gap)), (dim-5, 5+(i*gap)), width)
 
+
 def update_puzzle(puzzle):
+    """
+    The method draws the puzzle numbers when called.
+    :param puzzle: Array containing the sudoku puzzle.
+    :type puzzle: nd.array
+    """
     font = pygame.font.SysFont("comicsans", 30, True)
     for i in range(9):
         for j in range(9):
@@ -46,12 +58,42 @@ def update_puzzle(puzzle):
 
 
 def update(puzzle):
+    """
+    Updates the visualization. The user can determind the framerate by changing the speed.
+    :param puzzle: Array containing the sudoku puzzle.
+    :type puzzle: nd.array
+    """
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            exit(1)
+    clock.tick(fps)
     win.fill(white)
     draw_lines()
     update_puzzle(puzzle)
     pygame.display.update()
 
+
+def pause(puzzle):
+    """
+    This method pauses the visualizations.
+    :param puzzle: Array containing the sudoku puzzle.
+    :type puzzle: nd.array
+    """
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                exit(1)
+        update(puzzle)
+
+
 def sudoku(puzzle):
+    """
+    This method contains a brute force approach to solving the soduku problem.
+    :param puzzle: Array containing the sudoku puzzle.
+    :type puzzle: nd.array
+    :return: The solved puzzle.
+    :rtype: nd.array
+    """
     puzzle_org = puzzle.copy()
     i = 0
     j = 0
@@ -66,15 +108,12 @@ def sudoku(puzzle):
                         if t not in puzzle[row][col:col+3] and t not in puzzle[row+1][col:col+3] and t not in puzzle[row+2][col:col+3]:
                             puzzle[i][j] = t
                             update(puzzle)
-                            # time.sleep(0.01)
                             j += 1
                             break
                     t += 1
                     if t == 10:
                         puzzle[i][j] = 0
                         update(puzzle)
-                        # time.sleep(0.01)
-                        # print(f"row {i}, column {j}")
                         if j > 0:
                             j -= 1
                         else:
@@ -88,14 +127,14 @@ def sudoku(puzzle):
                                 i -= 1
                                 j = 8
                             elif i <= 0:
-                                print(puzzle)
                                 raise AssertionError(f"No solution found: i = {i}, j = {j}")
                         t = puzzle[i][j]
             else:
                 j += 1
         i += 1
         j = 0
-
+    print(puzzle)
+    pause(puzzle)
     return puzzle
 
 puzzle = [[5,3,0,0,7,0,0,0,0],
@@ -122,3 +161,4 @@ puzzle = [[5,3,0,0,7,0,0,0,0],
 
 
 start(np.array(puzzle))
+
